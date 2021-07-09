@@ -21,14 +21,14 @@
 <div th:fragment="header-body">
 <div class="topbar">
     <div class="topbar-left">
-        <div class="text-center p-t-10" style="margin: 0 auto;">
+        <div class="text-center p-t-10" style="margin: 0 auto;display: flex">
             <div class="pull-left" style="padding-left: 10px;">
                 <a th:href="@{/admin/index}">
                     <img th:src="@{/admin/images/logo.png}" width="50" height="50"/>
                 </a>
             </div>
-            <div id="leftBarTitle"  class="pull-left" style="padding-left: 10px">
-                <span style="font-size: 16px; color: #2f353f; line-height: 50px;"> <span th:text="${userName}"></span>的博客</span>
+            <div id="leftBarTitle"  class="pull-left" style="padding-left: 10px;flex: 1;overflow: hidden">
+                <span th:title="${userName} + '的博客'" style="font-size: 20px; color: #2f353f; line-height: 50px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;display: block"> <span th:text="${userName}"></span>的博客</span>
             </div>
         </div>
     </div>

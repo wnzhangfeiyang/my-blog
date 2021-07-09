@@ -93,11 +93,13 @@ public class ArticleController extends BaseController {
      */
     @GetMapping(value = "/{cid}")
     public String editArticle(@PathVariable String cid, HttpServletRequest request) {
+        UserVo userVo = userService.getUserInfo(request);
         ContentVo contents = contentsService.getContents(cid);
         request.setAttribute("contents", contents);
         List<MetaVo> categories = metasService.getMetas(Types.CATEGORY.getType());
         request.setAttribute("categories", categories);
         request.setAttribute("active", "article");
+        request.setAttribute("userVo", userVo);
         return "admin/article_edit";
     }
 

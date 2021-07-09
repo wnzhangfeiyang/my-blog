@@ -9,6 +9,7 @@ import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.ArchiveBo;
 import com.my.blog.website.modal.Bo.RestResponseBo;
 import com.my.blog.website.modal.Vo.CommentVo;
+import com.my.blog.website.modal.Vo.ContentVoExample;
 import com.my.blog.website.modal.Vo.MetaVo;
 import com.my.blog.website.service.IMetaService;
 import com.my.blog.website.service.ISiteService;
@@ -34,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 首页
@@ -174,6 +176,11 @@ public class IndexController extends BaseController {
             return RestResponseBo.fail(ErrorCode.BAD_REQUEST);
         }
 
+        ContentVo contents = contentService.getContents(String.valueOf(cid));
+        if(Objects.isNull(contents)){
+            return RestResponseBo.fail("");
+        }
+
         if (null == cid || StringUtils.isBlank(text)) {
             return RestResponseBo.fail("请输入完整后评论");
         }
@@ -200,14 +207,17 @@ public class IndexController extends BaseController {
             return RestResponseBo.fail("您发表评论太快了，请过会再试");
         }
 
+
         author = TaleUtils.cleanXSS(author);
         text = TaleUtils.cleanXSS(text);
 
         author = EmojiParser.parseToAliases(author);
         text = EmojiParser.parseToAliases(text);
 
+
         CommentVo comments = new CommentVo();
         comments.setAuthor(author);
+        comments.setAuthorId(contents.getAuthorId());
         comments.setCid(cid);
         comments.setIp(request.getRemoteAddr());
         comments.setUrl(url);
