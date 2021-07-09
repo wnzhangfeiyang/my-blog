@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -133,5 +134,15 @@ public class UserServiceImpl implements IUserService {
         if(!matches){
             throw new TipException(TipExceptionEnums.EMAIL_IS_VALID);
         }
+    }
+
+    @Override
+    public UserVo getUserInfo(HttpServletRequest request) {
+        Integer userId = TaleUtils.getCookieUid(request);
+        UserVo userVo = this.queryUserById(userId);
+        if(Objects.isNull(userVo)){
+            throw new TipException(TipExceptionEnums.USER_ID_IS_VALID);
+        }
+        return userVo;
     }
 }

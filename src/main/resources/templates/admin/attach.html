@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:with="title='文件管理',active='attach'">
-<header th:replace="admin/header::headerFragment(${title},${active})"></header>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:with="title='文件管理',active='attach', userName=${userVo.username}">
+<header th:replace="admin/header::headerFragment(${title},${active}, ${userName})"></header>
 <link href="//cdn.bootcss.com/dropzone/4.3.0/min/dropzone.min.css" rel="stylesheet"/>
 <style>
     #dropzone {

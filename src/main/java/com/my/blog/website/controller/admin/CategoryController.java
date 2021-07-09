@@ -6,7 +6,9 @@ import com.my.blog.website.dto.MetaDto;
 import com.my.blog.website.dto.Types;
 import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.RestResponseBo;
+import com.my.blog.website.modal.Vo.UserVo;
 import com.my.blog.website.service.IMetaService;
+import com.my.blog.website.service.IUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,9 @@ public class CategoryController extends BaseController {
     @Resource
     private IMetaService metasService;
 
+    @Resource
+    private IUserService userService;
+
     /**
      * 分类页
      * @param request
@@ -36,10 +41,12 @@ public class CategoryController extends BaseController {
      */
     @GetMapping(value = "")
     public String index(HttpServletRequest request) {
+        UserVo userVo = userService.getUserInfo(request);
         List<MetaDto> categories = metasService.getMetaList(Types.CATEGORY.getType(), null, WebConst.MAX_POSTS);
         List<MetaDto> tags = metasService.getMetaList(Types.TAG.getType(),  null, WebConst.MAX_POSTS);
         request.setAttribute("categories", categories);
         request.setAttribute("tags", tags);
+        request.setAttribute("userVo", userVo);
         return "admin/category";
     }
 

@@ -1,6 +1,7 @@
 package com.my.blog.website.controller.admin;
 
 import com.github.pagehelper.PageInfo;
+import com.my.blog.website.service.IUserService;
 import com.vdurmont.emoji.EmojiParser;
 import com.my.blog.website.controller.BaseController;
 import com.my.blog.website.exception.TipException;
@@ -31,6 +32,8 @@ public class CommentController extends BaseController {
 
     @Resource
     private ICommentService commentsService;
+    @Resource
+    private IUserService userService;
 
     /**
      * 评论列表
@@ -42,12 +45,13 @@ public class CommentController extends BaseController {
     @GetMapping(value = "")
     public String index(@RequestParam(value = "page", defaultValue = "1") int page,
                         @RequestParam(value = "limit", defaultValue = "15") int limit, HttpServletRequest request) {
-        UserVo users = this.user(request);
+        UserVo useVo = userService.getUserInfo(request);
         CommentVoExample commentVoExample = new CommentVoExample();
         commentVoExample.setOrderByClause("coid desc");
-        commentVoExample.createCriteria().andAuthorIdNotEqualTo(users.getUid());
+        commentVoExample.createCriteria().andAuthorIdEqualTo(useVo.getUid());
         PageInfo<CommentVo> commentsPaginator = commentsService.getCommentsWithPage(commentVoExample,page, limit);
         request.setAttribute("comments", commentsPaginator);
+        request.setAttribute("useVo", useVo);
         return "admin/comment_list";
     }
 

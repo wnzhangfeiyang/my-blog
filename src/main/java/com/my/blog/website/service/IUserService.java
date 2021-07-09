@@ -2,6 +2,8 @@ package com.my.blog.website.service;
 
 import com.my.blog.website.modal.Vo.UserVo;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Created by BlueT on 2017/3/3.
  */
@@ -39,4 +41,9 @@ public interface IUserService {
     void updateByUid(UserVo userVo);
 
     Boolean register(String username, String password, String comfirmPassword, String email);
+
+    /**
+     * 通过cookie拿用户信息
+     */
+    UserVo getUserInfo(HttpServletRequest request);
 }
