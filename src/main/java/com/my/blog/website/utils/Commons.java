@@ -313,12 +313,12 @@ public final class Commons {
      * @param limit
      * @return
      */
-    public static List<ContentVo> recent_articles(int limit) {
-        if (null == siteService) {
-            return EMPTY;
-        }
-        return siteService.recentContents(limit);
-    }
+//    public static List<ContentVo> recent_articles(int limit) {
+//        if (null == siteService) {
+//            return EMPTY;
+//        }
+//        return siteService.recentContents(userId, limit);
+//    }
 
     /**
      * 最新评论
@@ -326,12 +326,12 @@ public final class Commons {
      * @param limit
      * @return
      */
-    public static List<CommentVo> recent_comments(int limit) {
-        if (null == siteService) {
-            return EMPTY;
-        }
-        return siteService.recentComments(limit);
-    }
+//    public static List<CommentVo> recent_comments(int limit) {
+//        if (null == siteService) {
+//            return EMPTY;
+//        }
+//        return siteService.recentComments(userId, limit);
+//    }
 
     /**
      * 获取分类列表

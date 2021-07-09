@@ -10,7 +10,13 @@ public enum TipExceptionEnums {
     TWICE_PASSWORD_IS_NOT_SAME(1003, "两次密码输入不一致"),
     EMAIL_IS_VALID(1004, "邮箱格式不正确"),
     USERNAME_IS_JUST_ONE(1005, "用户名已被注册"),
-    EMAIL_IS_JUST_ONE(1005, "邮箱已被注册");
+    EMAIL_IS_JUST_ONE(1005, "邮箱已被注册"),
+
+
+    /**
+     * 用户id
+     */
+    USER_ID_IS_VALID(2001, "用户不存在");
 
 
     private int code;

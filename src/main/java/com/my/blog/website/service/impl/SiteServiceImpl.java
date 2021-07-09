@@ -3,6 +3,7 @@ package com.my.blog.website.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.my.blog.website.dao.AttachVoMapper;
 import com.my.blog.website.dto.MetaDto;
+import com.my.blog.website.enums.TipExceptionEnums;
 import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.ArchiveBo;
 import com.my.blog.website.modal.Vo.*;
@@ -52,12 +53,16 @@ public class SiteServiceImpl implements ISiteService {
     private MetaVoMapper metaDao;
 
     @Override
-    public List<CommentVo> recentComments(int limit) {
+    public List<CommentVo> recentComments(Integer userId, int limit) {
         LOGGER.debug("Enter recentComments method:limit={}", limit);
+        if(Objects.isNull(userId) || userId == 0){
+            throw new TipException(TipExceptionEnums.USER_ID_IS_VALID);
+        }
         if (limit < 0 || limit > 10) {
             limit = 10;
         }
         CommentVoExample example = new CommentVoExample();
+        example.createCriteria().andAuthorIdEqualTo(userId);
         example.setOrderByClause("created desc");
         PageHelper.startPage(1, limit);
         List<CommentVo> byPage = commentDao.selectByExampleWithBLOBs(example);
@@ -66,13 +71,16 @@ public class SiteServiceImpl implements ISiteService {
     }
 
     @Override
-    public List<ContentVo> recentContents(int limit) {
+    public List<ContentVo> recentContents(Integer userId, int limit) {
         LOGGER.debug("Enter recentContents method");
+        if(Objects.isNull(userId) || userId == 0){
+            throw new TipException(TipExceptionEnums.USER_ID_IS_VALID);
+        }
         if (limit < 0 || limit > 10) {
             limit = 10;
         }
         ContentVoExample example = new ContentVoExample();
-        example.createCriteria().andStatusEqualTo(Types.PUBLISH.getType()).andTypeEqualTo(Types.ARTICLE.getType());
+        example.createCriteria().andStatusEqualTo(Types.PUBLISH.getType()).andTypeEqualTo(Types.ARTICLE.getType()).andAuthorIdEqualTo(userId);
         example.setOrderByClause("created desc");
         PageHelper.startPage(1, limit);
         List<ContentVo> list = contentDao.selectByExample(example);
@@ -152,17 +160,21 @@ public class SiteServiceImpl implements ISiteService {
     }
 
     @Override
-    public StatisticsBo getStatistics() {
+    public StatisticsBo getStatistics(Integer userId) {
         LOGGER.debug("Enter getStatistics method");
         StatisticsBo statistics = new StatisticsBo();
 
         ContentVoExample contentVoExample = new ContentVoExample();
-        contentVoExample.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andStatusEqualTo(Types.PUBLISH.getType());
+        contentVoExample.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andStatusEqualTo(Types.PUBLISH.getType()).andAuthorIdEqualTo(userId);
         Long articles =   contentDao.countByExample(contentVoExample);
 
-        Long comments = commentDao.countByExample(new CommentVoExample());
+        CommentVoExample commentVoExample = new CommentVoExample();
+        commentVoExample.createCriteria().andAuthorIdEqualTo(userId);
+        Long comments = commentDao.countByExample(commentVoExample);
 
-        Long attachs = attachDao.countByExample(new AttachVoExample());
+        AttachVoExample attachVoExample = new AttachVoExample();
+        attachVoExample.createCriteria().andAuthorIdEqualTo(userId);
+        Long attachs = attachDao.countByExample(attachVoExample);
 
         MetaVoExample metaVoExample = new MetaVoExample();
         metaVoExample.createCriteria().andTypeEqualTo(Types.LINK.getType());

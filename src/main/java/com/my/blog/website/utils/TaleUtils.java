@@ -267,7 +267,8 @@ public class TaleUtils {
             boolean isSSL = false;
             Cookie cookie = new Cookie(WebConst.USER_IN_COOKIE, val);
             cookie.setPath("/");
-            cookie.setMaxAge(60*30);
+            // 设置一个小时过期
+            cookie.setMaxAge(60*60);
             cookie.setSecure(isSSL);
             response.addCookie(cookie);
         } catch (Exception e) {

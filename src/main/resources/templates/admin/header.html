@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:fragment="headerFragment(title,active)">
+<head th:fragment="headerFragment(title,active,userName)">
     <meta charset="utf-8"/>
-    <title><th:block th:text="${title!=null?title:'博客后台'}+'- 小🐑的博客'"></th:block></title>
+    <title><th:block th:text="${title!=null?title:'博客后台'}+'-'+${userName}+'的博客'"></th:block></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <meta content="Coderthemes" name="author"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <link rel="shortcut icon" th:href="@{/admin/images/favicon.png}"/>
     <link th:href="@{//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
     <link th:href="@{//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css}" rel="stylesheet"/>
     <link th:href="@{/admin/css/style.min.css}" rel="stylesheet" type="text/css"/>
@@ -28,8 +27,8 @@
                     <img th:src="@{/admin/images/logo.png}" width="50" height="50"/>
                 </a>
             </div>
-            <div class="pull-left" style="padding-left: 10px;">
-                <span style="font-size: 28px; color: #2f353f; line-height: 50px;">小🐑的博客</span>
+            <div id="leftBarTitle"  class="pull-left" style="padding-left: 10px">
+                <span style="font-size: 16px; color: #2f353f; line-height: 50px;"> <span th:text="${userName}"></span>的博客</span>
             </div>
         </div>
     </div>

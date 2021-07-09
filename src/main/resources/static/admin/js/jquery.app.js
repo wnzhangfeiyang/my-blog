@@ -11,8 +11,11 @@
 
         if ($("#wrapper").hasClass("enlarged") && $("body").hasClass("fixed-left")) {
             $("body").removeClass("fixed-left").addClass("fixed-left-void");
+            $("#leftBarTitle").css("display", "none")
+            console.log("===",$("#leftBarTitle"))
         } else if (!$("#wrapper").hasClass("enlarged") && $("body").hasClass("fixed-left-void")) {
             $("body").removeClass("fixed-left-void").addClass("fixed-left");
+            $("#leftBarTitle").css("display", "inline")
         }
 
         if ($("#wrapper").hasClass("enlarged")) {

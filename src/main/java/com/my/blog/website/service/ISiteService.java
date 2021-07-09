@@ -20,18 +20,22 @@ public interface ISiteService {
     /**
      * 最新收到的评论
      *
+     *
+     * @param userId
      * @param limit
      * @return
      */
-    List<CommentVo> recentComments(int limit);
+    List<CommentVo> recentComments(Integer userId, int limit);
 
     /**
      * 最新发表的文章
      *
+     *
+     * @param userId
      * @param limit
      * @return
      */
-    List<ContentVo> recentContents(int limit);
+    List<ContentVo> recentContents(Integer userId, int limit);
 
     /**
      * 查询一条评论
@@ -54,8 +58,9 @@ public interface ISiteService {
      * 获取后台统计数据
      *
      * @return
+     * @param userId
      */
-    StatisticsBo getStatistics();
+    StatisticsBo getStatistics(Integer userId);
 
     /**
      * 查询文章归档

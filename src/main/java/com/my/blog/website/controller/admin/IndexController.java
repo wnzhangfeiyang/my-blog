@@ -1,5 +1,6 @@
 package com.my.blog.website.controller.admin;
 
+import com.google.common.collect.Lists;
 import com.my.blog.website.service.ISiteService;
 import com.my.blog.website.constant.WebConst;
 import com.my.blog.website.controller.BaseController;
@@ -15,6 +16,8 @@ import com.my.blog.website.service.ILogService;
 import com.my.blog.website.service.IUserService;
 import com.my.blog.website.utils.GsonUtils;
 import com.my.blog.website.utils.TaleUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 后台管理首页
@@ -52,13 +59,25 @@ public class IndexController extends BaseController {
      */
     @GetMapping(value = {"","/index"})
     public String index(HttpServletRequest request){
-        LOGGER.info("Enter admin index method");
-        List<CommentVo> comments = siteService.recentComments(5);
-        List<ContentVo> contents = siteService.recentContents(5);
-        StatisticsBo statistics = siteService.getStatistics();
+        Integer userId = TaleUtils.getCookieUid(request);
+        LOGGER.info("当前用户id:{}", userId);
+        List<CommentVo> comments = siteService.recentComments(userId, 5);
+        if(CollectionUtils.isEmpty(comments)){
+            comments = Lists.newArrayList();
+        }
+        List<ContentVo> contents = siteService.recentContents(userId, 5);
+        if(CollectionUtils.isEmpty(contents)){
+            contents = Lists.newArrayList();
+        }
+        StatisticsBo statistics = siteService.getStatistics(userId);
         // 取最新的20条日志
         List<LogVo> logs = logService.getLogs(1, 5);
-
+        //通过userId 去取用户信息
+        UserVo userVo = userService.queryUserById(userId);
+        if(Objects.isNull(userVo)){
+            return null;
+        }
+        request.setAttribute("userVo", userVo);
         request.setAttribute("comments", comments);
         request.setAttribute("articles", contents);
         request.setAttribute("statistics", statistics);
