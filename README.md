@@ -57,11 +57,4 @@ fork from [My Blog](https://github.com/ZHENFENG13/My-Blog) , 该作者是在 [Ta
  系统设置：
  ![](img/admin-setting.png)
  
-## 开源协议
 
-[MIT](./LICENSE)
-
-## 感谢
-
-[ZHENFENG13](https://github.com/ZHENFENG13)
-[otale](https://github.com/otale)
