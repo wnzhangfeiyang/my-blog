@@ -56,6 +56,8 @@ public class PageController extends BaseController {
 
     @GetMapping(value = "new")
     public String newPage(HttpServletRequest request) {
+        UserVo userVo = userService.getUserInfo(request);
+        request.setAttribute("userVo", userVo);
         return "admin/page_edit";
     }
 
