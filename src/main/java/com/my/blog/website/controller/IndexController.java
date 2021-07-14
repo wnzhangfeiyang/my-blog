@@ -1,7 +1,9 @@
 package com.my.blog.website.controller;
 
 import com.github.pagehelper.PageInfo;
+import com.my.blog.website.config.DistributeLock;
 import com.my.blog.website.constant.WebConst;
+import com.my.blog.website.dto.CommentDTO;
 import com.my.blog.website.dto.ErrorCode;
 import com.my.blog.website.dto.MetaDto;
 import com.my.blog.website.dto.Types;
@@ -56,6 +58,9 @@ public class IndexController extends BaseController {
 
     @Resource
     private ISiteService siteService;
+
+    @Resource
+    private DistributeLock distributeLock;
 
     /**
      * 首页
@@ -161,78 +166,28 @@ public class IndexController extends BaseController {
     @PostMapping(value = "comment")
     @ResponseBody
     @Transactional(rollbackFor = TipException.class)
-    public RestResponseBo comment(HttpServletRequest request, HttpServletResponse response,
-                                  @RequestParam Integer cid, @RequestParam Integer coid,
-                                  @RequestParam String author, @RequestParam String mail,
-                                  @RequestParam String url, @RequestParam String text, @RequestParam String _csrf_token) {
+    public RestResponseBo comment(HttpServletRequest request, HttpServletResponse response, @RequestBody CommentDTO commentDTO) {
 
         String ref = request.getHeader("Referer");
+        String _csrf_token = commentDTO.get_csrf_token();
         if (StringUtils.isBlank(ref) || StringUtils.isBlank(_csrf_token)) {
-            return RestResponseBo.fail(ErrorCode.BAD_REQUEST);
+            throw new TipException(ErrorCode.BAD_REQUEST);
         }
-
         String token = cache.hget(Types.CSRF_TOKEN.getType(), _csrf_token);
         if (StringUtils.isBlank(token)) {
-            return RestResponseBo.fail(ErrorCode.BAD_REQUEST);
+            throw new TipException(ErrorCode.BAD_REQUEST);
         }
-
-        ContentVo contents = contentService.getContents(String.valueOf(cid));
-        if(Objects.isNull(contents)){
-            return RestResponseBo.fail("");
-        }
-
-        if (null == cid || StringUtils.isBlank(text)) {
-            return RestResponseBo.fail("请输入完整后评论");
-        }
-
-        if (StringUtils.isNotBlank(author) && author.length() > 50) {
-            return RestResponseBo.fail("姓名过长");
-        }
-
-        if (StringUtils.isNotBlank(mail) && !TaleUtils.isEmail(mail)) {
-            return RestResponseBo.fail("请输入正确的邮箱格式");
-        }
-
-        if (StringUtils.isNotBlank(url) && !PatternKit.isURL(url)) {
-            return RestResponseBo.fail("请输入正确的URL格式");
-        }
-
-        if (text.length() > 200) {
-            return RestResponseBo.fail("请输入200个字符以内的评论");
-        }
-
-        String val = IPKit.getIpAddrByRequest(request) + ":" + cid;
-        Integer count = cache.hget(Types.COMMENTS_FREQUENCY.getType(), val);
-        if (null != count && count > 0) {
-            return RestResponseBo.fail("您发表评论太快了，请过会再试");
-        }
-
-
-        author = TaleUtils.cleanXSS(author);
-        text = TaleUtils.cleanXSS(text);
-
-        author = EmojiParser.parseToAliases(author);
-        text = EmojiParser.parseToAliases(text);
-
-
-        CommentVo comments = new CommentVo();
-        comments.setAuthor(author);
-        comments.setAuthorId(contents.getAuthorId());
-        comments.setCid(cid);
-        comments.setIp(request.getRemoteAddr());
-        comments.setUrl(url);
-        comments.setContent(text);
-        comments.setMail(mail);
-        comments.setParent(coid);
+        // 请求路径
         try {
-            commentService.insertComment(comments);
-            cookie("tale_remember_author", URLEncoder.encode(author, "UTF-8"), 7 * 24 * 60 * 60, response);
-            cookie("tale_remember_mail", URLEncoder.encode(mail, "UTF-8"), 7 * 24 * 60 * 60, response);
-            if (StringUtils.isNotBlank(url)) {
-                cookie("tale_remember_url", URLEncoder.encode(url, "UTF-8"), 7 * 24 * 60 * 60, response);
+            // 设置对每个文章进行分布式锁，1分钟可评论一次
+            // 设置新的分布式锁，这种锁有点老， 采用stringRedisTemplate进行分布式锁
+            Boolean locked = distributeLock.isLocked(String.valueOf(commentDTO.getCid()));
+            if(locked){
+                throw new TipException("评论过快，休息一下再来哦～～");
             }
-            // 设置对每个文章1分钟可以评论一次
-            cache.hset(Types.COMMENTS_FREQUENCY.getType(), val, 1, 60);
+            commentService.comment(request, response, commentDTO);
+//            cache.hset(Types.COMMENTS_FREQUENCY.getType(), val, 1, 60);
+
             return RestResponseBo.ok();
         } catch (Exception e) {
             String msg = "评论发布失败";

@@ -2,9 +2,12 @@ package com.my.blog.website.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.my.blog.website.config.DistributeLock;
+import com.my.blog.website.dto.CommentDTO;
+import com.my.blog.website.dto.ErrorCode;
+import com.my.blog.website.dto.Types;
 import com.my.blog.website.exception.TipException;
-import com.my.blog.website.utils.DateKit;
-import com.my.blog.website.utils.TaleUtils;
+import com.my.blog.website.utils.*;
 import com.my.blog.website.dao.CommentVoMapper;
 import com.my.blog.website.modal.Bo.CommentBo;
 import com.my.blog.website.modal.Vo.CommentVo;
@@ -12,14 +15,21 @@ import com.my.blog.website.modal.Vo.CommentVoExample;
 import com.my.blog.website.modal.Vo.ContentVo;
 import com.my.blog.website.service.ICommentService;
 import com.my.blog.website.service.IContentService;
+import com.vdurmont.emoji.EmojiParser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by BlueT on 2017/3/16.
@@ -33,6 +43,10 @@ public class CommentServiceImpl implements ICommentService {
 
     @Resource
     private IContentService contentService;
+
+    @Resource
+    private DistributeLock distributeLock;
+
 
     @Override
     public void insertComment(CommentVo comments) {
@@ -154,5 +168,82 @@ public class CommentServiceImpl implements ICommentService {
         returnBo.setPrePage(ordinal.getPrePage());
         returnBo.setNextPage(ordinal.getNextPage());
         return returnBo;
+    }
+
+    @Override
+    public void comment(HttpServletRequest request, HttpServletResponse response, CommentDTO commentDTO) {
+        Integer cid = commentDTO.getCid();
+        ContentVo contents = contentService.getContents(String.valueOf(cid));
+        if(Objects.isNull(contents)){
+            throw new TipException("");
+        }
+        String text = commentDTO.getText();
+        if (null == cid || StringUtils.isBlank(text)) {
+            throw new TipException("请输入完整后评论");
+        }
+        String author = commentDTO.getAuthor();
+        if (StringUtils.isNotBlank(author) && author.length() > 50) {
+            throw new TipException("姓名过长");
+        }
+        String mail = commentDTO.getMail();
+        if (StringUtils.isNotBlank(mail) && !TaleUtils.isEmail(mail)) {
+            throw new TipException("请输入正确的邮箱格式");
+        }
+        String url = commentDTO.getUrl();
+        if (StringUtils.isNotBlank(url) && !PatternKit.isURL(url)) {
+            throw new TipException("请输入正确的URL格式");
+        }
+
+        if (text.length() > 200) {
+            throw new TipException("请输入200个字符以内的评论");
+        }
+
+
+        author = TaleUtils.cleanXSS(author);
+        text = TaleUtils.cleanXSS(text);
+
+        author = EmojiParser.parseToAliases(author);
+        text = EmojiParser.parseToAliases(text);
+
+        CommentVo comments = new CommentVo();
+        comments.setAuthor(author);
+        comments.setAuthorId(contents.getAuthorId());
+        comments.setCid(cid);
+        comments.setIp(request.getRemoteAddr());
+        comments.setUrl(url);
+        comments.setContent(text);
+        comments.setMail(mail);
+        comments.setParent(commentDTO.getCoid());
+        this.insertComment(comments);
+
+        Boolean lock = distributeLock.lock(String.valueOf(commentDTO.getCid()), 60000L);
+        if(lock){
+            LOGGER.info("加锁成功，文章Id:{}", commentDTO.getCid());
+        }
+        try {
+            cookie("tale_remember_author", URLEncoder.encode(author, "UTF-8"), 7 * 24 * 60 * 60, response);
+            cookie("tale_remember_mail", URLEncoder.encode(mail, "UTF-8"), 7 * 24 * 60 * 60, response);
+            if (StringUtils.isNotBlank(url)) {
+                cookie("tale_remember_url", URLEncoder.encode(url, "UTF-8"), 7 * 24 * 60 * 60, response);
+            }
+
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("UnsupportedEncodingException encode is error :{}", e.getMessage());
+        }
+    }
+
+    /**
+     * 设置cookie
+     *
+     * @param name
+     * @param value
+     * @param maxAge
+     * @param response
+     */
+    private void cookie(String name, String value, int maxAge, HttpServletResponse response) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setMaxAge(maxAge);
+        cookie.setSecure(false);
+        response.addCookie(cookie);
     }
 }

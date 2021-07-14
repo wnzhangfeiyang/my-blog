@@ -1,9 +1,13 @@
 package com.my.blog.website.service;
 
 import com.github.pagehelper.PageInfo;
+import com.my.blog.website.dto.CommentDTO;
 import com.my.blog.website.modal.Vo.CommentVo;
 import com.my.blog.website.modal.Vo.CommentVoExample;
 import com.my.blog.website.modal.Bo.CommentBo;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created by BlueT on 2017/3/16.
@@ -57,4 +61,5 @@ public interface ICommentService {
      */
     void update(CommentVo comments);
 
+    void comment(HttpServletRequest request, HttpServletResponse response, CommentDTO commentDTO);
 }

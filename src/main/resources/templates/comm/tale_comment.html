@@ -21,12 +21,19 @@
                 $('#comment-form #textarea').focus();
             },
             subComment: function () {
+                // 将字符串转换成数组
+                let s = decodeURIComponent($('#comment-form').serialize());
+                // 转换成map key value 那种json字符串形式
+                let obj = Object.fromEntries(s.split('&').map(i => i.split('=')));
+                console.log(obj);
                 $.ajax({
-                    type: 'post',
+                    method: 'post',
                     url: '/comment',
-                    data: $('#comment-form').serialize(),
+                    data: JSON.stringify(obj),
                     async: false,
                     dataType: 'json',
+                    contentType: 'application/json',
+                    headers: {"Content-Type": "application/json; charset=utf-8"},
                     success: function (result) {
                         $('#comment-form input[name=coid]').val('');
                         if (result && result.success) {
