@@ -46,10 +46,7 @@ public class CommentController extends BaseController {
     public String index(@RequestParam(value = "page", defaultValue = "1") int page,
                         @RequestParam(value = "limit", defaultValue = "15") int limit, HttpServletRequest request) {
         UserVo useVo = userService.getUserInfo(request);
-        CommentVoExample commentVoExample = new CommentVoExample();
-        commentVoExample.setOrderByClause("coid desc");
-        commentVoExample.createCriteria().andAuthorIdEqualTo(useVo.getUid());
-        PageInfo<CommentVo> commentsPaginator = commentsService.getCommentsWithPage(commentVoExample,page, limit);
+        PageInfo<CommentVo> commentsPaginator = commentsService.getCommentsWithPage(useVo.getUid(), page, limit);
         request.setAttribute("comments", commentsPaginator);
         request.setAttribute("useVo", useVo);
         return "admin/comment_list";

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.blog.website.dao.UsersMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="usersResultMap" type="com.my.blog.website.modal.Vo.UserVo">
+        <id column="uid" property="uid"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="email" property="email"/>
+        <result column="home_url" property="homeUrl"/>
+        <result column="screen_name" property="screenName"/>
+        <result column="created" property="created"/>
+        <result column="activated" property="activated"/>
+        <result column="logged" property="logged"/>
+        <result column="group_name" property="groupName"/>
+    </resultMap>
+
+
+    <select id="selectUsersPage" resultMap="usersResultMap">
+        select * from t_users where is_deleted = 0
+    </select>
+
+</mapper>

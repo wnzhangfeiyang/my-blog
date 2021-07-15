@@ -1,7 +1,9 @@
 package com.my.blog.website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.my.blog.website.dao.AttachMapper;
 import com.my.blog.website.dao.AttachVoMapper;
 import com.my.blog.website.utils.DateKit;
 import com.my.blog.website.modal.Vo.AttachVo;
@@ -22,22 +24,19 @@ public class AttachServiceImpl implements IAttachService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AttachServiceImpl.class);
 
     @Resource
-    private AttachVoMapper attachDao;
+    private AttachMapper attachDao;
 
     @Override
     public PageInfo<AttachVo> getAttachs(Integer page, Integer limit, Integer uid) {
         PageHelper.startPage(page, limit);
-        AttachVoExample attachVoExample = new AttachVoExample();
-        attachVoExample.createCriteria().andAuthorIdEqualTo(uid);
-        attachVoExample.setOrderByClause("id desc");
-        List<AttachVo> attachVos = attachDao.selectByExample(attachVoExample);
+        List<AttachVo> attachVos = attachDao.selectList(new QueryWrapper<AttachVo>().lambda().eq(AttachVo::getAuthorId, uid).orderByDesc(AttachVo::getId));
         return new PageInfo<>(attachVos);
     }
 
     @Override
     public AttachVo selectById(Integer id) {
         if(null != id){
-            return attachDao.selectByPrimaryKey(id);
+            return attachDao.selectById(id);
         }
         return null;
     }
@@ -50,13 +49,13 @@ public class AttachServiceImpl implements IAttachService {
         attach.setFkey(fkey);
         attach.setFtype(ftype);
         attach.setCreated(DateKit.getCurrentUnixTime());
-        attachDao.insertSelective(attach);
+        attachDao.insert(attach);
     }
 
     @Override
     public void deleteById(Integer id) {
         if (null != id) {
-            attachDao.deleteByPrimaryKey( id);
+            attachDao.deleteById( id);
         }
     }
 }

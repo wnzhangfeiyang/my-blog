@@ -5,6 +5,7 @@ import com.my.blog.website.dto.CommentDTO;
 import com.my.blog.website.modal.Vo.CommentVo;
 import com.my.blog.website.modal.Vo.CommentVoExample;
 import com.my.blog.website.modal.Bo.CommentBo;
+import com.my.blog.website.modal.Vo.UserVo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,12 +32,13 @@ public interface ICommentService {
 
     /**
      * 获取文章下的评论
-     * @param commentVoExample
+     *
+     * @param uid
      * @param page
      * @param limit
      * @return CommentVo
      */
-    PageInfo<CommentVo> getCommentsWithPage(CommentVoExample commentVoExample, int page, int limit);
+    PageInfo<CommentVo> getCommentsWithPage(Integer uid, int page, int limit);
 
 
     /**
@@ -61,5 +63,5 @@ public interface ICommentService {
      */
     void update(CommentVo comments);
 
-    void comment(HttpServletRequest request, HttpServletResponse response, CommentDTO commentDTO);
+    void comment(HttpServletRequest request, HttpServletResponse response, CommentDTO commentDTO, UserVo userInfo);
 }

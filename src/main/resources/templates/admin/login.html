@@ -100,16 +100,16 @@
 <script th:src="@{/admin/js/base.js}"></script>
 <script type="text/javascript">
     /*<![CDATA[*/
-    var tale = new $.tale()
     function checkForm() {
-        tale.post({
+        $.ajax({
             url: '/admin/loginUser',
             data: $("#loginForm").serialize(),
+            method: 'POST',
             success: function (result) {
                 if (result && result.success) {
                     window.location.href = '/admin/index';
                 } else {
-                    tale.alertError(result.msg || '登录失败');
+                    alert(result.msg || '登录失败');
                 }
             }
         });

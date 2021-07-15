@@ -1,7 +1,9 @@
 package com.my.blog.website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.my.blog.website.dao.LogVoMapper;
+import com.my.blog.website.dao.LogsMapper;
 import com.my.blog.website.service.ILogService;
 import com.my.blog.website.utils.DateKit;
 import com.my.blog.website.constant.WebConst;
@@ -23,7 +25,7 @@ public class LogServiceImpl implements ILogService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogServiceImpl.class);
 
     @Resource
-    private LogVoMapper logDao;
+    private LogsMapper logDao;
 
     @Override
     public void insertLog(LogVo logVo) {
@@ -50,10 +52,9 @@ public class LogServiceImpl implements ILogService {
         if (limit < 1 || limit > WebConst.MAX_POSTS) {
             limit = 10;
         }
-        LogVoExample logVoExample = new LogVoExample();
-        logVoExample.setOrderByClause("id desc");
+
         PageHelper.startPage((page - 1) * limit, limit);
-        List<LogVo> logVos = logDao.selectByExample(logVoExample);
+        List<LogVo> logVos = logDao.selectList(new QueryWrapper<LogVo>().lambda().orderByDesc(LogVo::getId));
         LOGGER.debug("Exit getLogs method");
         return logVos;
     }

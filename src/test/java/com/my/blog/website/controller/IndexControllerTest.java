@@ -1,5 +1,10 @@
 package com.my.blog.website.controller;
 
+import com.my.blog.website.dao.AttachMapper;
+import com.my.blog.website.dao.ContentsMapper;
+import com.my.blog.website.modal.Vo.AttachVo;
+import com.my.blog.website.modal.Vo.ContentVo;
+import com.my.blog.website.service.IAttachService;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +19,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import javax.annotation.Resource;
+
 import static org.junit.Assert.*;
 
 /**
@@ -27,6 +34,12 @@ public class IndexControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Resource
+    private AttachMapper attachMapper;
+
+    @Resource
+    private ContentsMapper contentsMapper;
+
     @Test
     @Ignore
     public void index() throws Exception {
@@ -34,4 +47,10 @@ public class IndexControllerTest {
 
     }
 
+    @Test
+    public void selectAttach(){
+        Integer id = 1;
+        ContentVo attachVo = contentsMapper.selectById(id);
+        System.out.println(attachVo);
+    }
 }

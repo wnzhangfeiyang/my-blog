@@ -1,6 +1,8 @@
 package com.my.blog.website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.my.blog.website.dao.OptionVoMapper;
+import com.my.blog.website.dao.OptionsMapper;
 import com.my.blog.website.modal.Vo.OptionVo;
 import com.my.blog.website.modal.Vo.OptionVoExample;
 import com.my.blog.website.service.IOptionService;
@@ -22,12 +24,12 @@ public class OptionServiceImpl implements IOptionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OptionServiceImpl.class);
 
     @Resource
-    private OptionVoMapper optionDao;
+    private OptionsMapper optionDao;
 
     @Override
     public void insertOption(OptionVo optionVo) {
         LOGGER.debug("Enter insertOption method:optionVo={}" ,optionVo);
-        optionDao.insertSelective(optionVo);
+        optionDao.insert(optionVo);
         LOGGER.debug("Exit insertOption method.");
     }
 
@@ -37,10 +39,10 @@ public class OptionServiceImpl implements IOptionService {
         OptionVo optionVo = new OptionVo();
         optionVo.setName(name);
         optionVo.setValue(value);
-        if(optionDao.selectByExample(new OptionVoExample()).size()==0){
-            optionDao.insertSelective(optionVo);
+        if(optionDao.selectList(new QueryWrapper()).size()==0){
+            optionDao.insert(optionVo);
         }else{
-            optionDao.updateByPrimaryKeySelective(optionVo);
+            optionDao.updateById(optionVo);
         }
         LOGGER.debug("Exit insertOption method.");
     }
@@ -54,6 +56,6 @@ public class OptionServiceImpl implements IOptionService {
 
     @Override
     public List<OptionVo> getOptions(){
-        return optionDao.selectByExample(new OptionVoExample());
+        return optionDao.selectList(new QueryWrapper());
     }
 }

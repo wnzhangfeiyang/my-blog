@@ -29,8 +29,12 @@ spring:
 
 
 
-mybatis:
-  mapper-locations: classpath:mapper/*.xml
+#mybatis:
+#  mapper-locations: classpath:mapper/*.xml
+#  type-aliases-package: com.my.blog.website.dao
+
+mybatis-plus:
+  mapper-locations: classpath:dao/*.xml
   type-aliases-package: com.my.blog.website.dao
 
 

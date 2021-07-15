@@ -43,10 +43,7 @@ public class PageController extends BaseController {
     @GetMapping(value = "")
     public String index(HttpServletRequest request) {
         UserVo userVo = userService.getUserInfo(request);
-        ContentVoExample contentVoExample = new ContentVoExample();
-        contentVoExample.setOrderByClause("created desc");
-        contentVoExample.createCriteria().andTypeEqualTo(Types.PAGE.getType()).andAuthorIdEqualTo(userVo.getUid());
-        PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(contentVoExample, 1, WebConst.MAX_POSTS);
+        PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(userVo.getUid(), 1, WebConst.MAX_POSTS);
         request.setAttribute("articles", contentsPaginator);
         request.setAttribute("userVo", userVo);
         return "admin/page_list";

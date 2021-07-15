@@ -1,17 +1,16 @@
 package com.my.blog.website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.my.blog.website.config.DistributeLock;
+import com.my.blog.website.dao.CommentsMapper;
 import com.my.blog.website.dto.CommentDTO;
-import com.my.blog.website.dto.ErrorCode;
-import com.my.blog.website.dto.Types;
 import com.my.blog.website.exception.TipException;
+import com.my.blog.website.modal.Vo.UserVo;
 import com.my.blog.website.utils.*;
-import com.my.blog.website.dao.CommentVoMapper;
 import com.my.blog.website.modal.Bo.CommentBo;
 import com.my.blog.website.modal.Vo.CommentVo;
-import com.my.blog.website.modal.Vo.CommentVoExample;
 import com.my.blog.website.modal.Vo.ContentVo;
 import com.my.blog.website.service.ICommentService;
 import com.my.blog.website.service.IContentService;
@@ -39,7 +38,7 @@ public class CommentServiceImpl implements ICommentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommentServiceImpl.class);
 
     @Resource
-    private CommentVoMapper commentDao;
+    private CommentsMapper commentDao;
 
     @Resource
     private IContentService contentService;
@@ -74,7 +73,7 @@ public class CommentServiceImpl implements ICommentService {
         }
         comments.setOwnerId(contents.getAuthorId());
         comments.setCreated(DateKit.getCurrentUnixTime());
-        commentDao.insertSelective(comments);
+        commentDao.insert(comments);
 
         ContentVo temp = new ContentVo();
         temp.setCid(contents.getCid());
@@ -87,10 +86,7 @@ public class CommentServiceImpl implements ICommentService {
 
         if (null != cid) {
             PageHelper.startPage(page, limit);
-            CommentVoExample commentVoExample = new CommentVoExample();
-            commentVoExample.createCriteria().andCidEqualTo(cid).andParentEqualTo(0);
-            commentVoExample.setOrderByClause("coid desc");
-            List<CommentVo> parents = commentDao.selectByExampleWithBLOBs(commentVoExample);
+            List<CommentVo> parents = commentDao.selectList(new QueryWrapper<CommentVo>().lambda().eq(CommentVo::getCid, cid).eq(CommentVo::getParent, 0).orderByDesc(CommentVo::getCoid));
             PageInfo<CommentVo> commentPaginator = new PageInfo<>(parents);
             PageInfo<CommentBo> returnBo = copyPageInfo(commentPaginator);
             if (parents.size() != 0) {
@@ -107,9 +103,9 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    public PageInfo<CommentVo> getCommentsWithPage(CommentVoExample commentVoExample, int page, int limit) {
+    public PageInfo<CommentVo> getCommentsWithPage(Integer uid, int page, int limit) {
         PageHelper.startPage(page, limit);
-        List<CommentVo> commentVos = commentDao.selectByExampleWithBLOBs(commentVoExample);
+        List<CommentVo> commentVos = commentDao.selectList(new QueryWrapper<CommentVo>().lambda().eq(CommentVo::getAuthorId, uid).orderByDesc(CommentVo::getCoid));
         PageInfo<CommentVo> pageInfo = new PageInfo<>(commentVos);
         return pageInfo;
     }
@@ -117,7 +113,7 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     public void update(CommentVo comments) {
         if (null != comments && null != comments.getCoid()) {
-            commentDao.updateByPrimaryKeyWithBLOBs(comments);
+            commentDao.updateById(comments);
         }
     }
 
@@ -126,7 +122,7 @@ public class CommentServiceImpl implements ICommentService {
         if (null == coid) {
             throw new TipException("主键为空");
         }
-        commentDao.deleteByPrimaryKey(coid);
+        commentDao.deleteById(coid);
         ContentVo contents = contentService.getContents(cid + "");
         if (null != contents && contents.getCommentsNum() > 0) {
             ContentVo temp = new ContentVo();
@@ -139,7 +135,7 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     public CommentVo getCommentById(Integer coid) {
         if (null != coid) {
-            return commentDao.selectByPrimaryKey(coid);
+            return commentDao.selectById(coid);
         }
         return null;
     }
@@ -171,7 +167,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    public void comment(HttpServletRequest request, HttpServletResponse response, CommentDTO commentDTO) {
+    public void comment(HttpServletRequest request, HttpServletResponse response, CommentDTO commentDTO, UserVo userInfo) {
         Integer cid = commentDTO.getCid();
         ContentVo contents = contentService.getContents(String.valueOf(cid));
         if(Objects.isNull(contents)){
@@ -216,7 +212,7 @@ public class CommentServiceImpl implements ICommentService {
         comments.setParent(commentDTO.getCoid());
         this.insertComment(comments);
 
-        Boolean lock = distributeLock.lock(String.valueOf(commentDTO.getCid()), 60000L);
+        Boolean lock = distributeLock.lock(String.valueOf(commentDTO.getCid() + userInfo.getUid()), 60000L);
         if(lock){
             LOGGER.info("加锁成功，文章Id:{}", commentDTO.getCid());
         }

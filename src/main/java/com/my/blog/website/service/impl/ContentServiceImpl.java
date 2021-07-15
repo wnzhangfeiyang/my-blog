@@ -1,9 +1,12 @@
 package com.my.blog.website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.my.blog.website.constant.WebConst;
-import com.my.blog.website.dao.MetaVoMapper;
+import com.my.blog.website.dao.ContentsMapper;
+import com.my.blog.website.dao.MetasMapper;
 import com.my.blog.website.dto.Types;
 import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Vo.ContentVo;
@@ -15,7 +18,6 @@ import com.my.blog.website.utils.DateKit;
 import com.my.blog.website.utils.TaleUtils;
 import com.my.blog.website.utils.Tools;
 import com.vdurmont.emoji.EmojiParser;
-import com.my.blog.website.dao.ContentVoMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +34,10 @@ public class ContentServiceImpl implements IContentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentServiceImpl.class);
 
     @Resource
-    private ContentVoMapper contentDao;
+    private ContentsMapper contentDao;
 
     @Resource
-    private MetaVoMapper metaDao;
+    private MetasMapper metaDao;
 
     @Resource
     private IRelationshipService relationshipService;
@@ -70,9 +72,7 @@ public class ContentServiceImpl implements IContentService {
                 throw new TipException("路径太短了");
             }
             if (!TaleUtils.isPath(contents.getSlug())) throw new TipException("您输入的路径不合法");
-            ContentVoExample contentVoExample = new ContentVoExample();
-            contentVoExample.createCriteria().andTypeEqualTo(contents.getType()).andStatusEqualTo(contents.getSlug());
-            long count = contentDao.countByExample(contentVoExample);
+            Integer count = contentDao.selectCount(new QueryWrapper<ContentVo>().lambda().eq(ContentVo::getType, contents.getType()).eq(ContentVo::getStatus, contents.getStatus()));
             if (count > 0) throw new TipException("该路径已经存在，请重新输入");
         } else {
             contents.setSlug(null);
@@ -98,11 +98,8 @@ public class ContentServiceImpl implements IContentService {
     @Override
     public PageInfo<ContentVo> getContents(Integer p, Integer limit) {
         LOGGER.debug("Enter getContents method");
-        ContentVoExample example = new ContentVoExample();
-        example.setOrderByClause("created desc");
-        example.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andStatusEqualTo(Types.PUBLISH.getType());
         PageHelper.startPage(p, limit);
-        List<ContentVo> data = contentDao.selectByExampleWithBLOBs(example);
+        List<ContentVo> data = contentDao.selectList(new QueryWrapper<ContentVo>().lambda().eq(ContentVo::getType, Types.ARTICLE.getType()).eq(ContentVo::getStatus, Types.PUBLISH.getType()).orderByDesc(ContentVo::getCreated));
         PageInfo<ContentVo> pageInfo = new PageInfo<>(data);
         LOGGER.debug("Exit getContents method");
         return pageInfo;
@@ -112,16 +109,14 @@ public class ContentServiceImpl implements IContentService {
     public ContentVo getContents(String id) {
         if (StringUtils.isNotBlank(id)) {
             if (Tools.isNumber(id)) {
-                ContentVo contentVo = contentDao.selectByPrimaryKey(Integer.valueOf(id));
+                ContentVo contentVo = contentDao.selectById(Integer.valueOf(id));
                 if (contentVo != null) {
                     contentVo.setHits(contentVo.getHits() + 1);
-                    contentDao.updateByPrimaryKey(contentVo);
+                    contentDao.updateById(contentVo);
                 }
                 return contentVo;
             } else {
-                ContentVoExample contentVoExample = new ContentVoExample();
-                contentVoExample.createCriteria().andSlugEqualTo(id);
-                List<ContentVo> contentVos = contentDao.selectByExampleWithBLOBs(contentVoExample);
+                List<ContentVo> contentVos = contentDao.selectList(new QueryWrapper<ContentVo>().lambda().eq(ContentVo::getSlug, id));
                 if (contentVos.size() != 1) {
                     throw new TipException("query content by id and return is not one");
                 }
@@ -134,7 +129,7 @@ public class ContentServiceImpl implements IContentService {
     @Override
     public void updateContentByCid(ContentVo contentVo) {
         if (null != contentVo && null != contentVo.getCid()) {
-            contentDao.updateByPrimaryKeySelective(contentVo);
+            contentDao.updateById(contentVo);
         }
     }
 
@@ -151,20 +146,18 @@ public class ContentServiceImpl implements IContentService {
     @Override
     public PageInfo<ContentVo> getArticles(String keyword, Integer page, Integer limit) {
         PageHelper.startPage(page, limit);
-        ContentVoExample contentVoExample = new ContentVoExample();
-        ContentVoExample.Criteria criteria = contentVoExample.createCriteria();
-        criteria.andTypeEqualTo(Types.ARTICLE.getType());
-        criteria.andStatusEqualTo(Types.PUBLISH.getType());
-        criteria.andTitleLike("%" + keyword + "%");
-        contentVoExample.setOrderByClause("created desc");
-        List<ContentVo> contentVos = contentDao.selectByExampleWithBLOBs(contentVoExample);
+        List<ContentVo> contentVos = contentDao.selectList(new QueryWrapper<ContentVo>().lambda().
+                eq(ContentVo::getType, Types.ARTICLE.getType()).
+                eq(ContentVo::getStatus, Types.PUBLISH.getType()).
+                like(ContentVo::getTitle, "%" + keyword + "%").
+                orderByDesc(ContentVo::getCreated));
         return new PageInfo<>(contentVos);
     }
 
     @Override
-    public PageInfo<ContentVo> getArticlesWithpage(ContentVoExample commentVoExample, Integer page, Integer limit) {
+    public PageInfo<ContentVo> getArticlesWithpage(Integer uid, Integer page, Integer limit) {
         PageHelper.startPage(page, limit);
-        List<ContentVo> contentVos = contentDao.selectByExampleWithBLOBs(commentVoExample);
+        List<ContentVo> contentVos = contentDao.selectList(new QueryWrapper<ContentVo>().lambda().eq(ContentVo::getType, Types.ARTICLE.getType()).eq(ContentVo::getAuthorId, uid).orderByDesc(ContentVo::getCreated));
         return new PageInfo<>(contentVos);
     }
 
@@ -172,7 +165,7 @@ public class ContentServiceImpl implements IContentService {
     public void deleteByCid(Integer cid) {
         ContentVo contents = this.getContents(cid + "");
         if (null != contents) {
-            contentDao.deleteByPrimaryKey(cid);
+            contentDao.deleteById(cid);
             relationshipService.deleteById(cid, null);
         }
     }
@@ -181,9 +174,7 @@ public class ContentServiceImpl implements IContentService {
     public void updateCategory(String ordinal, String newCatefory) {
         ContentVo contentVo = new ContentVo();
         contentVo.setCategories(newCatefory);
-        ContentVoExample example = new ContentVoExample();
-        example.createCriteria().andCategoriesEqualTo(ordinal);
-        contentDao.updateByExampleSelective(contentVo, example);
+        contentDao.update(contentVo, new UpdateWrapper<ContentVo>().lambda().eq(ContentVo::getCategories, ordinal));
     }
 
     @Override
@@ -214,7 +205,7 @@ public class ContentServiceImpl implements IContentService {
         Integer cid = contents.getCid();
         contents.setContent(EmojiParser.parseToAliases(contents.getContent()));
 
-        contentDao.updateByPrimaryKeySelective(contents);
+        contentDao.updateById(contents);
         relationshipService.deleteById(cid, null);
         metasService.saveMetas(cid, contents.getTags(), Types.TAG.getType());
         metasService.saveMetas(cid, contents.getCategories(), Types.CATEGORY.getType());

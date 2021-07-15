@@ -65,12 +65,13 @@ public interface IContentService {
 
 
     /**
-     * @param commentVoExample
+     *
+     * @param uid
      * @param page
      * @param limit
      * @return
      */
-    PageInfo<ContentVo> getArticlesWithpage(ContentVoExample commentVoExample, Integer page, Integer limit);
+    PageInfo<ContentVo> getArticlesWithpage(Integer uid, Integer page, Integer limit);
     /**
      * 根据文章id删除
      * @param cid

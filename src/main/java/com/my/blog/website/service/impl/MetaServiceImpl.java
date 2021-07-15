@@ -1,6 +1,9 @@
 package com.my.blog.website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.my.blog.website.constant.WebConst;
+import com.my.blog.website.dao.MetasMapper;
 import com.my.blog.website.dto.MetaDto;
 import com.my.blog.website.dto.Types;
 import com.my.blog.website.exception.TipException;
@@ -30,7 +33,7 @@ public class MetaServiceImpl implements IMetaService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetaServiceImpl.class);
 
     @Resource
-    private MetaVoMapper metaDao;
+    private MetasMapper metaDao;
 
     @Resource
     private IRelationshipService relationshipService;
@@ -54,10 +57,7 @@ public class MetaServiceImpl implements IMetaService {
     @Override
     public List<MetaVo> getMetas(String types) {
         if (StringUtils.isNotBlank(types)) {
-            MetaVoExample metaVoExample = new MetaVoExample();
-            metaVoExample.setOrderByClause("sort desc, mid desc");
-            metaVoExample.createCriteria().andTypeEqualTo(types);
-            return metaDao.selectByExample(metaVoExample);
+            return metaDao.selectList(new QueryWrapper<MetaVo>().lambda().eq(MetaVo::getType, types).orderByDesc(MetaVo::getSort, MetaVo::getMid));
         }
         return null;
     }
@@ -82,12 +82,12 @@ public class MetaServiceImpl implements IMetaService {
 
     @Override
     public void delete(int mid) {
-        MetaVo metas = metaDao.selectByPrimaryKey(mid);
+        MetaVo metas = metaDao.selectById(mid);
         if (null != metas) {
             String type = metas.getType();
             String name = metas.getName();
 
-            metaDao.deleteByPrimaryKey(mid);
+            metaDao.deleteById(mid);
 
             List<RelationshipVoKey> rlist = relationshipService.getRelationshipById(null, mid);
             if (null != rlist) {
@@ -115,7 +115,7 @@ public class MetaServiceImpl implements IMetaService {
         if (StringUtils.isNotBlank(type) && StringUtils.isNotBlank(name)) {
             MetaVoExample metaVoExample = new MetaVoExample();
             metaVoExample.createCriteria().andTypeEqualTo(type).andNameEqualTo(name);
-            List<MetaVo> metaVos = metaDao.selectByExample(metaVoExample);
+            List<MetaVo> metaVos = metaDao.selectList(new QueryWrapper<MetaVo>().lambda().eq(MetaVo::getType, type).eq(MetaVo::getName, name));
             MetaVo metas;
             if (metaVos.size() != 0) {
                 throw new TipException("已经存在该项");
@@ -123,14 +123,14 @@ public class MetaServiceImpl implements IMetaService {
                 metas = new MetaVo();
                 metas.setName(name);
                 if (null != mid) {
-                    MetaVo original = metaDao.selectByPrimaryKey(mid);
+                    MetaVo original = metaDao.selectById(mid);
                     metas.setMid(mid);
-                    metaDao.updateByPrimaryKeySelective(metas);
+                    metaDao.update(metas, new UpdateWrapper<MetaVo>().lambda().eq(MetaVo::getMid, mid));
 //                    更新原有文章的categories
                     contentService.updateCategory(original.getName(),name);
                 } else {
                     metas.setType(type);
-                    metaDao.insertSelective(metas);
+                    metaDao.insert(metas);
                 }
             }
         }
@@ -150,9 +150,7 @@ public class MetaServiceImpl implements IMetaService {
     }
 
     private void saveOrUpdate(Integer cid, String name, String type) {
-        MetaVoExample metaVoExample = new MetaVoExample();
-        metaVoExample.createCriteria().andTypeEqualTo(type).andNameEqualTo(name);
-        List<MetaVo> metaVos = metaDao.selectByExample(metaVoExample);
+        List<MetaVo> metaVos = metaDao.selectList(new QueryWrapper<MetaVo>().lambda().eq(MetaVo::getType, type).eq(MetaVo::getName, name));
 
         int mid;
         MetaVo metas;
@@ -166,7 +164,7 @@ public class MetaServiceImpl implements IMetaService {
             metas.setSlug(name);
             metas.setName(name);
             metas.setType(type);
-            metaDao.insertSelective(metas);
+            metaDao.insert(metas);
             mid = metas.getMid();
         }
         if (mid != 0) {
@@ -198,14 +196,14 @@ public class MetaServiceImpl implements IMetaService {
     @Override
     public void saveMeta(MetaVo metas) {
         if (null != metas) {
-            metaDao.insertSelective(metas);
+            metaDao.insert(metas);
         }
     }
 
     @Override
     public void update(MetaVo metas) {
         if (null != metas && null != metas.getMid()) {
-            metaDao.updateByPrimaryKeySelective(metas);
+            metaDao.updateById(metas);
         }
     }
 }

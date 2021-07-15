@@ -29,8 +29,8 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(value = Exception.class)
-    public String exception(Exception e){
-        LOGGER.error("数据验证异常:e={}",e.getMessage());
-        return "comm/error_404";
+    public RestResponseBo exception(Exception e){
+        LOGGER.info("数据验证异常:e={}",e.getMessage());
+        return RestResponseBo.fail(e);
     }
 }

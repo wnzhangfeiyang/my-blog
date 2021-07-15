@@ -10,18 +10,12 @@ import com.my.blog.website.dto.Types;
 import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.ArchiveBo;
 import com.my.blog.website.modal.Bo.RestResponseBo;
-import com.my.blog.website.modal.Vo.CommentVo;
-import com.my.blog.website.modal.Vo.ContentVoExample;
-import com.my.blog.website.modal.Vo.MetaVo;
-import com.my.blog.website.service.IMetaService;
-import com.my.blog.website.service.ISiteService;
+import com.my.blog.website.modal.Vo.*;
+import com.my.blog.website.service.*;
 import com.my.blog.website.utils.PatternKit;
 import com.my.blog.website.utils.TaleUtils;
 import com.vdurmont.emoji.EmojiParser;
 import com.my.blog.website.modal.Bo.CommentBo;
-import com.my.blog.website.modal.Vo.ContentVo;
-import com.my.blog.website.service.ICommentService;
-import com.my.blog.website.service.IContentService;
 import com.my.blog.website.utils.IPKit;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -61,6 +55,9 @@ public class IndexController extends BaseController {
 
     @Resource
     private DistributeLock distributeLock;
+
+    @Resource
+    private IUserService userService;
 
     /**
      * 首页
@@ -167,7 +164,7 @@ public class IndexController extends BaseController {
     @ResponseBody
     @Transactional(rollbackFor = TipException.class)
     public RestResponseBo comment(HttpServletRequest request, HttpServletResponse response, @RequestBody CommentDTO commentDTO) {
-
+        UserVo userInfo = userService.getUserInfo(request);
         String ref = request.getHeader("Referer");
         String _csrf_token = commentDTO.get_csrf_token();
         if (StringUtils.isBlank(ref) || StringUtils.isBlank(_csrf_token)) {
@@ -181,11 +178,11 @@ public class IndexController extends BaseController {
         try {
             // 设置对每个文章进行分布式锁，1分钟可评论一次
             // 设置新的分布式锁，这种锁有点老， 采用stringRedisTemplate进行分布式锁
-            Boolean locked = distributeLock.isLocked(String.valueOf(commentDTO.getCid()));
+            Boolean locked = distributeLock.isLocked(String.valueOf(commentDTO.getCid() + userInfo.getUid()));
             if(locked){
                 throw new TipException("评论过快，休息一下再来哦～～");
             }
-            commentService.comment(request, response, commentDTO);
+            commentService.comment(request, response, commentDTO, userInfo);
 //            cache.hset(Types.COMMENTS_FREQUENCY.getType(), val, 1, 60);
 
             return RestResponseBo.ok();

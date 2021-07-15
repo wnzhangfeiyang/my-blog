@@ -41,6 +41,10 @@ public class RestResponseBo<T> {
         this.success = success;
     }
 
+    public RestResponseBo(Exception e) {
+        this.msg = e.getMessage();
+    }
+
 
     public RestResponseBo(boolean success, T payload) {
         this.timestamp = System.currentTimeMillis() / 1000;
@@ -131,6 +135,10 @@ public class RestResponseBo<T> {
 
     public static RestResponseBo fail(String msg) {
         return new RestResponseBo(false, msg);
+    }
+
+    public static RestResponseBo fail(Exception e){
+        return new RestResponseBo(e);
     }
 
     public static RestResponseBo fail(int code) {

@@ -1,5 +1,9 @@
 package com.my.blog.website.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.my.blog.website.dao.RelationshipsMapper;
 import com.my.blog.website.modal.Vo.RelationshipVoExample;
 import com.my.blog.website.modal.Vo.RelationshipVoKey;
 import com.my.blog.website.service.IRelationshipService;
@@ -19,37 +23,21 @@ public class RelationshipServiceImpl implements IRelationshipService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipServiceImpl.class);
 
     @Resource
-    private RelationshipVoMapper relationshipVoMapper;
+    private RelationshipsMapper shipMapper;
 
     @Override
     public void deleteById(Integer cid, Integer mid) {
-        RelationshipVoExample relationshipVoExample = new RelationshipVoExample();
-        RelationshipVoExample.Criteria criteria = relationshipVoExample.createCriteria();
-        if (cid != null) {
-            criteria.andCidEqualTo(cid);
-        }
-        if (mid != null) {
-            criteria.andMidEqualTo(mid);
-        }
-        relationshipVoMapper.deleteByExample(relationshipVoExample);
+        shipMapper.delete(new QueryWrapper<RelationshipVoKey>().lambda().eq(StringUtils.isNotEmpty(String.valueOf(cid)), RelationshipVoKey::getCid, cid).eq(StringUtils.isNotEmpty(String.valueOf(mid)), RelationshipVoKey::getMid, mid));
     }
 
     @Override
     public List<RelationshipVoKey> getRelationshipById(Integer cid, Integer mid) {
-        RelationshipVoExample relationshipVoExample = new RelationshipVoExample();
-        RelationshipVoExample.Criteria criteria = relationshipVoExample.createCriteria();
-        if (cid != null) {
-            criteria.andCidEqualTo(cid);
-        }
-        if (mid != null) {
-            criteria.andMidEqualTo(mid);
-        }
-        return relationshipVoMapper.selectByExample(relationshipVoExample);
+        return shipMapper.selectList(new QueryWrapper<RelationshipVoKey>().lambda().eq(StringUtils.isNotEmpty(String.valueOf(cid)), RelationshipVoKey::getCid, cid).eq(StringUtils.isNotEmpty(String.valueOf(mid)), RelationshipVoKey::getMid, mid));
     }
 
     @Override
     public void insertVo(RelationshipVoKey relationshipVoKey) {
-        relationshipVoMapper.insert(relationshipVoKey);
+        shipMapper.insert(relationshipVoKey);
     }
 
     @Override
@@ -63,8 +51,8 @@ public class RelationshipServiceImpl implements IRelationshipService {
         if (mid != null) {
             criteria.andMidEqualTo(mid);
         }
-        long num = relationshipVoMapper.countByExample(relationshipVoExample);
+        Integer num = shipMapper.selectCount(new QueryWrapper<RelationshipVoKey>().lambda().eq(StringUtils.isNotEmpty(String.valueOf(cid)), RelationshipVoKey::getCid, cid).eq(StringUtils.isNotEmpty(String.valueOf(mid)), RelationshipVoKey::getMid, mid));
         LOGGER.debug("Exit countById method return num={}",num);
-        return num;
+        return Long.parseLong(String.valueOf(num));
     }
 }

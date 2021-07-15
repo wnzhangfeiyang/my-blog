@@ -1,36 +1,18 @@
 package com.my.blog.website.modal.Vo;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
  * @author 
  */
+@Data
+@TableName("t_relationships")
 public class RelationshipVoKey implements Serializable {
-    /**
-     * 内容主键
-     */
-    private Integer cid;
-
-    /**
-     * 项目主键
-     */
-    private Integer mid;
-
     private static final long serialVersionUID = 1L;
 
-    public Integer getCid() {
-        return cid;
-    }
-
-    public void setCid(Integer cid) {
-        this.cid = cid;
-    }
-
-    public Integer getMid() {
-        return mid;
-    }
-
-    public void setMid(Integer mid) {
-        this.mid = mid;
-    }
+    private Integer cid;
+    private Integer mid;
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.blog.website.dao.MetasMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="metasResultMap" type="com.my.blog.website.modal.Vo.MetaVo">
+        <id column="mid" property="mid"/>
+        <result column="name" property="name"/>
+        <result column="slug" property="slug"/>
+        <result column="type" property="type"/>
+        <result column="description" property="description"/>
+        <result column="sort" property="sort"/>
+        <result column="parent" property="parent"/>
+    </resultMap>
+
+
+    <select id="selectMetasPage" resultMap="metasResultMap">
+        select * from t_metas where is_deleted = 0
+    </select>
+
+
+    <resultMap id="MetaDto" type="com.my.blog.website.dto.MetaDto" extends="BaseResultMap">
+        <result column="count" property="count" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="selectFromSql" resultMap="MetaDto" parameterType="Map">
+        select a.*, count(b.cid) as count from t_metas a left join `t_relationships` b on a.mid = b.mid where a.type = #{type} group by a.mid order by #{order} limit #{limit}
+    </select>
+
+    <select id="countWithSql" parameterType="Integer" resultType="Integer">
+        SELECT count(0)
+        FROM t_contents a LEFT JOIN t_relationships b ON a.cid = b.cid
+        WHERE b.mid = #{value} AND a.status = 'publish' AND a.type = 'post';
+    </select>
+
+
+    <select id="selectDtoByNameAndType" resultMap="MetaDto">
+        select a.*, count(b.cid) as count from t_metas a left join `t_relationships` b on a.mid = b.mid where a.type = #{type} and a.name = #{name} group by a.mid
+    </select>
+</mapper>

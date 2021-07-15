@@ -65,7 +65,7 @@ public class ArticleController extends BaseController {
         ContentVoExample contentVoExample = new ContentVoExample();
         contentVoExample.setOrderByClause("created desc");
         contentVoExample.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andAuthorIdEqualTo(userVo.getUid());
-        PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(contentVoExample,page,limit);
+        PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(userVo.getUid(), page,limit);
         request.setAttribute("userVo", userVo);
         request.setAttribute("articles", contentsPaginator);
         return "admin/article_list";
