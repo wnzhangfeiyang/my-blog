@@ -79,7 +79,7 @@ public class AuthController extends BaseController {
      * @param response
      * @return
      */
-    @PostMapping(value = "login")
+    @PostMapping(value = "loginUser")
     @ResponseBody
     public RestResponseBo doLogin(@RequestParam String username,
                                   @RequestParam String password,

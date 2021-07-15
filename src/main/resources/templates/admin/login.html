@@ -100,10 +100,10 @@
 <script th:src="@{/admin/js/base.js}"></script>
 <script type="text/javascript">
     /*<![CDATA[*/
-    var tale = new $.tale();
+    var tale = new $.tale()
     function checkForm() {
         tale.post({
-            url: '/admin/login',
+            url: '/admin/loginUser',
             data: $("#loginForm").serialize(),
             success: function (result) {
                 if (result && result.success) {
