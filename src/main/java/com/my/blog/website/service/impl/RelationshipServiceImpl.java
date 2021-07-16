@@ -2,12 +2,9 @@ package com.my.blog.website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.my.blog.website.dao.RelationshipsMapper;
-import com.my.blog.website.modal.Vo.RelationshipVoExample;
 import com.my.blog.website.modal.Vo.RelationshipVoKey;
 import com.my.blog.website.service.IRelationshipService;
-import com.my.blog.website.dao.RelationshipVoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,14 +40,6 @@ public class RelationshipServiceImpl implements IRelationshipService {
     @Override
     public Long countById(Integer cid, Integer mid) {
         LOGGER.debug("Enter countById method:cid={},mid={}",cid,mid);
-        RelationshipVoExample relationshipVoExample = new RelationshipVoExample();
-        RelationshipVoExample.Criteria criteria = relationshipVoExample.createCriteria();
-        if (cid != null) {
-            criteria.andCidEqualTo(cid);
-        }
-        if (mid != null) {
-            criteria.andMidEqualTo(mid);
-        }
         Integer num = shipMapper.selectCount(new QueryWrapper<RelationshipVoKey>().lambda().eq(StringUtils.isNotEmpty(String.valueOf(cid)), RelationshipVoKey::getCid, cid).eq(StringUtils.isNotEmpty(String.valueOf(mid)), RelationshipVoKey::getMid, mid));
         LOGGER.debug("Exit countById method return num={}",num);
         return Long.parseLong(String.valueOf(num));

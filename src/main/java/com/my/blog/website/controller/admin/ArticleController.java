@@ -5,18 +5,15 @@ import com.github.pagehelper.PageInfo;
 import com.my.blog.website.controller.BaseController;
 import com.my.blog.website.dto.LogActions;
 import com.my.blog.website.dto.Types;
-import com.my.blog.website.enums.TipExceptionEnums;
 import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.RestResponseBo;
 import com.my.blog.website.modal.Vo.ContentVo;
-import com.my.blog.website.modal.Vo.ContentVoExample;
 import com.my.blog.website.modal.Vo.MetaVo;
 import com.my.blog.website.modal.Vo.UserVo;
 import com.my.blog.website.service.IContentService;
 import com.my.blog.website.service.ILogService;
 import com.my.blog.website.service.IMetaService;
 import com.my.blog.website.service.IUserService;
-import com.my.blog.website.utils.TaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by 13 on 2017/2/21.
@@ -62,9 +58,6 @@ public class ArticleController extends BaseController {
     public String index(@RequestParam(value = "page", defaultValue = "1") int page,
                         @RequestParam(value = "limit", defaultValue = "15") int limit, HttpServletRequest request) {
         UserVo userVo = userService.getUserInfo(request);
-        ContentVoExample contentVoExample = new ContentVoExample();
-        contentVoExample.setOrderByClause("created desc");
-        contentVoExample.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andAuthorIdEqualTo(userVo.getUid());
         PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(userVo.getUid(), page,limit);
         request.setAttribute("userVo", userVo);
         request.setAttribute("articles", contentsPaginator);

@@ -11,9 +11,7 @@ import com.my.blog.website.modal.Vo.MetaVo;
 import com.my.blog.website.modal.Vo.RelationshipVoKey;
 import com.my.blog.website.service.IMetaService;
 import com.my.blog.website.service.IRelationshipService;
-import com.my.blog.website.dao.MetaVoMapper;
 import com.my.blog.website.modal.Vo.ContentVo;
-import com.my.blog.website.modal.Vo.MetaVoExample;
 import com.my.blog.website.service.IContentService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -113,8 +111,6 @@ public class MetaServiceImpl implements IMetaService {
     @Override
     public void saveMeta(String type, String name, Integer mid) {
         if (StringUtils.isNotBlank(type) && StringUtils.isNotBlank(name)) {
-            MetaVoExample metaVoExample = new MetaVoExample();
-            metaVoExample.createCriteria().andTypeEqualTo(type).andNameEqualTo(name);
             List<MetaVo> metaVos = metaDao.selectList(new QueryWrapper<MetaVo>().lambda().eq(MetaVo::getType, type).eq(MetaVo::getName, name));
             MetaVo metas;
             if (metaVos.size() != 0) {

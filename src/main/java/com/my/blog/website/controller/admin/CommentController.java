@@ -7,7 +7,6 @@ import com.my.blog.website.controller.BaseController;
 import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.RestResponseBo;
 import com.my.blog.website.modal.Vo.CommentVo;
-import com.my.blog.website.modal.Vo.CommentVoExample;
 import com.my.blog.website.modal.Vo.UserVo;
 import com.my.blog.website.service.ICommentService;
 import com.my.blog.website.utils.TaleUtils;
