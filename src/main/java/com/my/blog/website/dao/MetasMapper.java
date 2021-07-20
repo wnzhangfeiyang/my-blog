@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.my.blog.website.dto.MetaDto;
 import com.my.blog.website.modal.Vo.MetaVo;
+import org.apache.ibatis.annotations.Param;
 
 
 import java.util.List;
@@ -42,9 +43,9 @@ public interface MetasMapper extends BaseMapper<MetaVo> {
 	 */
 	List<MetaVo> selectMetasPage(IPage page, MetaVo metas);
 
-	List<MetaDto> selectFromSql(Map<String, Object> paraMap);
+	List<MetaDto> selectFromSql(@Param("paraMap") Map<String, Object> paraMap);
 
-	int countWithSql(Integer mid);
+	int countWithSql(@Param("mid") Integer mid);
 
-	MetaDto selectDtoByNameAndType(String name, String type);
+	MetaDto selectDtoByNameAndType(@Param("name") String name, @Param("type") String type);
 }

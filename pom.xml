@@ -221,6 +221,17 @@
                     </configuration>
                 </plugin>
             </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+        </resources>
         </build>
     <!-- 普通的maven打包方式 -->
 

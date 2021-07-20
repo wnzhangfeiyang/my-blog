@@ -3,6 +3,7 @@ package com.my.blog.website.controller;
 import com.google.common.collect.Maps;
 import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.RestResponseBo;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -31,6 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public RestResponseBo exception(Exception e){
         LOGGER.info("数据验证异常:e={}",e.getMessage());
+        e.printStackTrace();
         return RestResponseBo.fail(e);
     }
 }

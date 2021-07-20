@@ -104,7 +104,6 @@
 <script th:src="@{/admin/js/base.js}"></script>
 <script type="text/javascript">
     /*<![CDATA[*/
-    var tale = new $.tale();
 
     function checkRegister() {
         console.log($("#registerForm").serialize())
@@ -121,12 +120,12 @@
             success: function (result) {
                 console.log("result: ", result);
                 if (result && result.success) {
-                    tale.alertOk(result.msg);
+                    alert(result.msg);
                     setTimeout(function () {
                         window.location.href = '/admin/login';
                     }, 3000)
                 } else {
-                    tale.alertError(result.msg);
+                    alert(result.msg);
                 }
             }
         });

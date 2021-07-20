@@ -42,7 +42,10 @@ public class RestResponseBo<T> {
     }
 
     public RestResponseBo(Exception e) {
+        this.timestamp = System.currentTimeMillis() / 1000;
         this.msg = e.getMessage();
+        this.success = false;
+        this.code = 400;
     }
 
 

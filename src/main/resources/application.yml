@@ -34,7 +34,7 @@ spring:
 #  type-aliases-package: com.my.blog.website.dao
 
 mybatis-plus:
-  mapper-locations: classpath:dao/*.xml
+  mapper-locations: classpath:com/my/blog/website/mapper/*.xml
   type-aliases-package: com.my.blog.website.dao
 
 
