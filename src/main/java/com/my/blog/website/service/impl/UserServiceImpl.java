@@ -93,7 +93,7 @@ public class UserServiceImpl implements IUserService {
             throw new TipException(TipExceptionEnums.USERNAME_IS_JUST_ONE);
         }
         // 邮箱也是唯一的
-        userVos = userDao.selectCount(new QueryWrapper<UserVo>().lambda().eq(UserVo::getUsername, username).eq(UserVo::getEmail, email));
+        userVos = userDao.selectCount(new QueryWrapper<UserVo>().lambda().eq(UserVo::getEmail, email));
         if(userVos > 0L){
             throw new TipException(TipExceptionEnums.EMAIL_IS_JUST_ONE);
         }

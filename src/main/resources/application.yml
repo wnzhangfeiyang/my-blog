@@ -16,7 +16,7 @@ spring:
     password: admin
   redis:
     host: 127.0.0.1
-    password: 123
+#    password: 123
     port: 6379
     database: 6
     ssl: false
@@ -26,8 +26,25 @@ spring:
       min-idle: 0       # 连接池中的最小空闲连接，默认值也是0
       max-active: 8     # 如果赋值为-1，则表示不限制；如果pool已经分配了maxActive个jedis实例，则此时pool的状态为exhausted(耗尽)。
       max-wait: -1      # 等待可用连接的最大时间，单位毫秒，默认值为-1，表示永不超时。如果超过等待时间，则直接抛出
-
-
+ #kafka
+  #先要启动kafka的服务
+  kafka:
+    servers: 172.31.12.75:9092
+    consumer:
+      group-id: firstGroup
+      enable-auto-commit: true #消费者的偏移量是自动提交还是手动提交，如果是true就是自动提交
+      auto-commit-interval: 100ms #消费者偏移量自动提交的时间间隔
+      properties:
+        session.timeout.ms: 15000
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest #找不到当前消费者的偏移量，则直接将偏移量重置为最早的
+    producer:
+      retries: 0 #若设置大于0的值，客户端会将发送失败的记录重新发送
+      batch-size: 16384 #当将多个记录被发送到同一个分区时，producer将尝试记录组合到更少的请求中，这有助于提升客户端和服务器的性能，这个配置控制一个批次的默认大小（以字节为单位）。16384是缺省的配置
+      buffer-memory: 33554432 #Producer 用来缓冲等待被发送到服务器的记录的总字节数，33554432是缺省配置一共是32MB
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer #关键字的序列化类
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer #值的序列化类
 
 #mybatis:
 #  mapper-locations: classpath:mapper/*.xml

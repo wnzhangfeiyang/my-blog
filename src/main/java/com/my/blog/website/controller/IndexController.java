@@ -191,7 +191,8 @@ public class IndexController extends BaseController {
             if (e instanceof TipException) {
                 msg = e.getMessage();
             } else {
-                LOGGER.error(msg, e);
+                LOGGER.info("评论发布失败:{}", e.getMessage());
+
             }
             return RestResponseBo.fail(msg);
         }

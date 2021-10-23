@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.my.blog.website.config.DistributeLock;
+import com.my.blog.website.config.KafkaSender;
 import com.my.blog.website.dao.CommentsMapper;
 import com.my.blog.website.dto.CommentDTO;
 import com.my.blog.website.exception.TipException;
@@ -46,6 +47,9 @@ public class CommentServiceImpl implements ICommentService {
     @Resource
     private DistributeLock distributeLock;
 
+    @Resource
+    private com.my.blog.website.config.KafkaSender KafkaSender;
+
 
     @Override
     public void insertComment(CommentVo comments) {
@@ -79,6 +83,7 @@ public class CommentServiceImpl implements ICommentService {
         temp.setCid(contents.getCid());
         temp.setCommentsNum(contents.getCommentsNum() + 1);
         contentService.updateContentByCid(temp);
+        KafkaSender.send("评论来了快快处理");
     }
 
     @Override
